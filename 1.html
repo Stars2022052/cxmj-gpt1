@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>潮汐秘境计算器</title>
+<style>
+:root{--cell:32px;--gap:3px;--ink:#263241;--muted:#718096;--line:#d8dee8;--blue:#2879ca;--brown:#98643a;--red:#d84343;--gold:#f7d85d;--panel:#fff;--bg:#f4f6fa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px}
+button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #82b9fa;outline-offset:2px}
+.shell{max-width:1120px;margin:0 auto;padding:24px 20px 34px}.head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}.brand h1{font-size:25px;margin:0 0 6px;letter-spacing:.02em}.brand p{color:var(--muted);margin:0;line-height:1.6}.offline-tag{white-space:nowrap;border:1px solid #cfe5d8;background:#effaf3;border-radius:999px;padding:7px 11px;color:#28734a;font-size:12px}
+.panel{background:var(--panel);border:1px solid #e3e8f0;border-radius:15px;box-shadow:0 5px 22px #2538580a;padding:16px;margin-bottom:13px}.toolbar-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:13px}.size-controls,.stats,.action-buttons,.quick-tools{display:flex;align-items:center;flex-wrap:wrap;gap:7px}.section-label{font-size:12px;color:var(--muted);margin-right:3px}.btn{border:1px solid var(--line);border-radius:8px;background:#fff;color:#344256;padding:8px 11px;transition:background .15s,border-color .15s}.btn:hover{background:#f6f8fb;border-color:#aeb9ca}.btn.active{background:#eaf3ff;border-color:#6eaae9;color:#175ea7;font-weight:650}.btn.primary{background:#236fc4;border-color:#236fc4;color:white}.btn.primary:hover{background:#1b5da9}.btn.danger{color:#b33a3a}.stats{justify-content:flex-end;gap:8px}.stat{background:#f7f9fc;border:1px solid #e8edf4;border-radius:9px;padding:7px 10px;min-width:94px}.stat span{display:block;color:var(--muted);font-size:11px;margin-bottom:2px}.stat strong{font-size:17px;font-variant-numeric:tabular-nums}.stat em{font-style:normal;color:var(--muted);font-size:11px;font-weight:400}
+.quick-panel{padding:12px 15px}.quick-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.quick-head strong{font-size:13px}.quick-head span{font-size:12px;color:var(--muted)}.quick-tools{gap:6px}.tool-btn{min-width:39px;min-height:34px;padding:5px 9px;border:1px solid #dce3ed;border-radius:7px;background:#fff;color:#344256}.tool-btn.active{background:#eaf3ff;border:2px solid #448fdb;color:#175ea7;padding:4px 8px}.tool-btn.gem{color:#a65a09}.tool-btn.safe{color:#667181}.tool-btn.clear{color:#b33a3a}
+.main-grid{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:13px;align-items:start}.board-panel{min-width:0;padding:17px 12px 14px}.board-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 auto 13px;max-width:100%}.board-top h2{font-size:14px;margin:0}.board-top .hint{font-size:12px;color:var(--muted)}.board-wrap{width:100%;overflow-x:auto;padding:5px 3px 9px;display:flex;justify-content:center}.board{display:grid;gap:var(--gap);width:max-content;touch-action:manipulation}.cell{height:var(--cell);width:var(--cell);padding:0;display:flex;align-items:center;justify-content:center;position:relative;border-radius:5px;border:1px solid #dce2eb;background:#fff;color:#5b6678;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;user-select:none;transition:transform .1s,background .12s}.cell.unknown{border-style:dashed}.cell.low{border-color:#5598df;color:var(--blue)}.cell.medium{border-color:#b68a61;color:var(--brown)}.cell.high{border-color:#e07c7c;color:var(--red)}.cell.number{border-style:solid;border-color:#dce2eb;background:#fff;font-size:16px}.cell.num-0{color:#a5adb8}.cell.num-1{color:#2879ca}.cell.num-2{color:#2b9a68}.cell.num-3{color:#de842b}.cell.num-4{color:#875ad6}.cell.num-5{color:#d83c48}.cell.num-6{color:#269f9a}.cell.num-7{color:#424c5b}.cell.num-8{color:#9b5c3d}.cell.gem{background:#fff1a8;border:1px solid #e1a52a;color:#a95d00;font-size:17px}.cell.safe{background:#e7eaf0;border:1px solid #d5dbe5;color:#7a8493;font-size:16px}.cell.selected{outline:2px solid #377fca;outline-offset:1px;z-index:1}.cell.recommend{z-index:2;border:2px solid #e23636!important;color:#d92727!important;animation:breathe 1.35s ease-in-out infinite;box-shadow:0 0 0 0 #ed40404d}.cell.gem.recommend{color:#a95d00!important}.cell.safe.recommend{color:#d92727!important}@keyframes breathe{0%,100%{transform:scale(1);box-shadow:0 0 0 0 #ed404020}50%{transform:scale(1.09);box-shadow:0 0 0 4px #ed404030}}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:4px 0 0;font-size:11px;color:var(--muted)}.legend span{display:inline-flex;align-items:center;gap:5px}.swatch{display:inline-block;width:10px;height:10px;border:1px dashed #679ddd;border-radius:3px;background:white}.swatch.mid{border-color:#b68a61}.swatch.high{border-color:#e07c7c}.swatch.gem{background:#fff1a8;border:1px solid #e1a52a}.swatch.safe{background:#e7eaf0;border:1px solid #d5dbe5}
+.side{display:flex;flex-direction:column;gap:13px}.side .panel{margin:0}.recommend-title{font-size:13px;color:var(--muted);margin-bottom:8px}.recommend-main{font-size:16px;font-weight:750;line-height:1.45;margin-bottom:5px}.recommend-sub{font-size:12px;color:var(--muted);line-height:1.6}.big-prob{font-size:25px;font-weight:800;color:#d84343;font-variant-numeric:tabular-nums}.meter{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0 0;padding-top:10px;border-top:1px solid #edf0f5}.meter div{font-size:12px;color:var(--muted)}.meter strong{font-size:15px;color:var(--ink)}.status-line{font-size:12px;line-height:1.65;margin-top:10px;padding:9px 10px;border-radius:8px;background:#f5f8fc;color:#526174}.status-line.exact{background:#edf8f0;color:#2d754b}.status-line.approx{background:#fff7e8;color:#94641b}.status-line.error{background:#fff0f0;color:#b63535}.counts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.global-toggle{display:flex;align-items:flex-start;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid #edf0f5;color:#566477;font-size:12px;line-height:1.5}.global-toggle input{margin:2px 0 0;accent-color:#2879ca}.global-toggle small{display:block;color:#8a95a5;font-size:11px;margin-top:2px}.count-card{padding:9px 10px;border:1px solid #edf0f5;border-radius:9px}.count-card span{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}.count-card strong{font-size:19px;font-variant-numeric:tabular-nums}.footer-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.footer-actions .btn{flex:1}.notice{margin:13px auto 0;color:#788394;font-size:11px;line-height:1.65;text-align:center;max-width:850px}
+.cell-menu{position:fixed;z-index:40;width:260px;background:#fff;border:1px solid #dce3ed;border-radius:12px;box-shadow:0 14px 40px #14233c30;padding:11px}.menu-title{font-size:12px;color:#68778b;margin:0 0 9px}.menu-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.menu-option{border:1px solid #dce3ed;border-radius:7px;background:#fff;min-height:34px;font-weight:650;color:#405066}.menu-option:hover{background:#f3f7fc}.menu-option.special{grid-column:span 2}.menu-option.gem{background:#fff5be;border-color:#edcc5d;color:#9e5907}.menu-option.safe{background:#edf0f5;color:#626e7e}.menu-option.clear{color:#b33a3a}.menu-close{display:block;margin:8px 0 0 auto;border:0;background:transparent;color:#788394;font-size:12px;padding:4px 6px}
+@media(max-width:820px){.main-grid{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.side .panel:last-child{grid-column:1/-1}.stats{justify-content:flex-start}.toolbar-top{align-items:flex-start}.head{align-items:flex-start}}
+@media(max-width:540px){:root{--cell:28px;--gap:2px}.shell{padding:15px 9px 25px}.head{margin-bottom:13px}.brand h1{font-size:21px}.brand p{font-size:12px}.offline-tag{font-size:10px;padding:6px 8px}.panel{padding:12px;border-radius:12px}.board-panel{padding:12px 4px}.board-top{padding:0 7px}.board-top .hint{display:none}.side{grid-template-columns:1fr}.side .panel:last-child{grid-column:auto}.stat{min-width:87px;padding:6px 8px}.stat strong{font-size:15px}.quick-head{align-items:flex-start;flex-direction:column;gap:3px}.tool-btn{min-width:34px;padding:5px 7px}.tool-btn.active{padding:4px 6px}.cell{font-size:9px}.cell.number{font-size:14px}.cell.gem{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.cell.recommend{animation:none;box-shadow:0 0 0 3px #ed404030}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="head">
+    <div class="brand"><h1>潮汐秘境计算器</h1><p>手动记录游戏中的数字与钻石，推导确定格并计算下一步概率。</p></div>
+    <div class="offline-tag">● 单文件 · 离线可用</div>
+  </header>
+  <section class="panel">
+    <div class="toolbar-top">
+      <div class="size-controls" aria-label="棋盘尺寸"><span class="section-label">地图尺寸</span><button class="btn active" data-size="8">8×8</button><button class="btn" data-size="10">10×10</button><button class="btn" data-size="12">12×12</button></div>
+      <div class="stats" aria-live="polite">
+        <div class="stat"><span>剩余钻石</span><strong id="remaining">20</strong><em id="totalLabel"> / 20</em></div>
+        <div class="stat"><span>已标钻石</span><strong id="used">0</strong></div>
+        <div class="stat"><span>已填写格</span><strong id="filled">0</strong></div>
+      </div>
+    </div>
+  </section>
+  <section class="panel quick-panel">
+    <div class="quick-head"><strong>单击涂快捷栏</strong><span>选中工具后点击格子直接标记；选「点格选菜单」则点击格子弹出标记菜单。</span></div>
+    <div class="quick-tools" id="quickTools">
+      <button class="tool-btn active" data-tool="menu" title="点击棋盘格后弹出菜单">点格选菜单</button>
+      <button class="tool-btn" data-tool="0">0</button><button class="tool-btn" data-tool="1">1</button><button class="tool-btn" data-tool="2">2</button><button class="tool-btn" data-tool="3">3</button><button class="tool-btn" data-tool="4">4</button><button class="tool-btn" data-tool="5">5</button><button class="tool-btn" data-tool="6">6</button><button class="tool-btn" data-tool="7">7</button><button class="tool-btn" data-tool="8">8</button>
+      <button class="tool-btn gem" data-tool="gem">💎 钻石</button><button class="tool-btn safe" data-tool="safe">× 安全</button><button class="tool-btn clear" data-tool="clear">清除</button>
+    </div>
+  </section>
+  <main class="main-grid">
+    <section class="panel board-panel">
+      <div class="board-top"><h2 id="boardTitle">8×8 棋盘</h2><span class="hint">行 × 列 · 点击格子记录已知信息</span></div>
+      <div class="board-wrap"><div class="board" id="board" role="grid" aria-label="潮汐秘境辅助棋盘"></div></div>
+      <div class="legend"><span><i class="swatch"></i>低概率 &lt;20%</span><span><i class="swatch mid"></i>中概率 20–49%</span><span><i class="swatch high"></i>高概率 ≥50%</span><span><i class="swatch gem"></i>钻石</span><span><i class="swatch safe"></i>安全</span></div>
+    </section>
+    <aside class="side">
+      <section class="panel">
+        <div class="recommend-title">下一步推荐</div><div class="recommend-main" id="recommendMain">等待计算…</div><div class="recommend-sub" id="recommendSub">根据当前记录自动更新。</div>
+        <div class="meter"><div>推荐格钻石概率</div><div class="big-prob" id="recommendProb">—</div></div>
+        <div class="status-line" id="modeStatus">正在分析当前棋盘…</div>
+      </section>
+      <section class="panel">
+        <div class="recommend-title">棋盘摘要</div><div class="counts">
+          <div class="count-card"><span>必定是钻石</span><strong id="sureGems">0</strong></div><div class="count-card"><span>必定不是钻石</span><strong id="sureSafe">0</strong></div><div class="count-card"><span>已输入数字</span><strong id="numberCount">0</strong></div><div class="count-card"><span>待定格</span><strong id="unknownCount">64</strong></div>
+        </div>
+        <label class="global-toggle"><input type="checkbox" id="globalConstraint"><span>纳入全局钻石总数约束<small>默认关闭；开启后，精确概率也会考虑全盘剩余钻石数量。</small></span></label>
+        <div class="footer-actions"><button class="btn" id="undoBtn" disabled>↶ 撤销</button><button class="btn primary" id="deduceBtn">自动推导</button><button class="btn danger" id="clearBtn">清空棋盘</button></div>
+      </section>
+    </aside>
+  </main>
+  <p class="notice">这是纯辅助工具，不生成钻石布局，也不模拟游戏开局。请将你在游戏中实际看到的格子结果手动输入。所有数据只保存在当前页面内，关闭页面不会上传任何内容。</p>
+</div>
+<div class="cell-menu" id="cellMenu" hidden role="dialog" aria-label="格子标记菜单">
+  <div class="menu-title" id="menuTitle">标记第 1 行、第 1 列</div>
+  <div class="menu-grid" id="menuGrid"></div>
+  <button class="menu-close" id="menuClose">取消</button>
+</div>
+<script>
+(()=>{
+'use strict';
+const TOTAL={8:20,10:30,12:45};
+const $=id=>document.getElementById(id);
+const state={size:8,cells:Array(64).fill(null),tool:'menu',selected:-1,menuIndex:-1,history:[],probabilities:{},solverMode:'approx',solutionCount:null,conflict:null,recommend:null,useGlobal:false};
+const board=$('board'), menu=$('cellMenu'), menuGrid=$('menuGrid');
+function cloneCells(cells){return cells.slice();}
+function neighbors(index,size=state.size){const r=Math.floor(index/size),c=index%size,out=[];for(let rr=Math.max(0,r-1);rr<=Math.min(size-1,r+1);rr++)for(let cc=Math.max(0,c-1);cc<=Math.min(size-1,c+1);cc++){if(rr===r&&cc===c)continue;out.push(rr*size+cc);}return out;}
+function coordinates(index){return {row:Math.floor(index/state.size)+1,col:index%state.size+1};}
+function labelStatus(v){if(v===null)return '未填写';if(v==='gem')return '钻石';if(v==='safe')return '安全格';return `数字 ${v}`;}
+function counts(cells=state.cells){let gems=0,safe=0,numbers=0,filled=0,unknown=0;cells.forEach(v=>{if(v===null)unknown++;else{filled++;if(v==='gem')gems++;else if(v==='safe')safe++;else numbers++;}});return {gems,safe,numbers,filled,unknown,remaining:TOTAL[state.size]-gems};}
+function takeSnapshot(){state.history.push({size:state.size,cells:cloneCells(state.cells)});if(state.history.length>250)state.history.shift();}
+function applyAction(index,value){if(index<0||index>=state.cells.length)return false;if(state.cells[index]===value){closeMenu();return false;}takeSnapshot();state.cells[index]=value;state.selected=index;closeMenu();const res=propagate(state.cells);state.cells=res.cells;state.conflict=res.conflict;render();return true;}
+function propagate(input){const cells=cloneCells(input);let changed=true,passes=0,conflict=null;while(changed&&passes++<cells.length+2){changed=false;
+  for(let i=0;i<cells.length;i++){if(typeof cells[i]!=='number')continue;const ns=neighbors(i);let gems=0,unknown=[];for(const j of ns){if(cells[j]==='gem')gems++;else if(cells[j]===null)unknown.push(j);}const need=cells[i]-gems;if(need<0||need>unknown.length){conflict=`第 ${coordinates(i).row} 行、第 ${coordinates(i).col} 列的数字约束无法满足。`;break;}if(unknown.length&&need===0){unknown.forEach(j=>{if(cells[j]===null){cells[j]='safe';changed=true;}});}else if(unknown.length&&need===unknown.length){unknown.forEach(j=>{if(cells[j]===null){cells[j]='gem';changed=true;}});}}
+  if(conflict)break;
+  if(state.useGlobal){const c=counts(cells),remaining=c.remaining;if(remaining<0||remaining>c.unknown){conflict=`钻石总数约束无法满足：剩余钻石 ${remaining}，待定格 ${c.unknown}。`;break;}if(c.unknown&&remaining===0){for(let i=0;i<cells.length;i++)if(cells[i]===null){cells[i]='safe';changed=true;}}else if(c.unknown&&remaining===c.unknown){for(let i=0;i<cells.length;i++)if(cells[i]===null){cells[i]='gem';changed=true;}}}
+ }
+ if(passes>=cells.length+2&&changed&&!conflict)conflict='推导未能收敛，请检查格子标记。';return {cells,conflict};}
+function makeConstraints(cells,unknown){const idByCell=new Map(unknown.map((idx,id)=>[idx,id]));const constraints=[];for(let i=0;i<cells.length;i++){if(typeof cells[i]!=='number')continue;let gemN=0,vars=[];neighbors(i).forEach(j=>{if(cells[j]==='gem')gemN++;else if(cells[j]===null)vars.push(idByCell.get(j));});constraints.push({vars,target:cells[i]-gemN,source:i});}
+ if(state.useGlobal){const c=counts(cells);constraints.push({vars:unknown.map((_,i)=>i),target:TOTAL[state.size]-c.gems,global:true});}return constraints;}
+function exactProbabilities(cells,unknown){const constraints=makeConstraints(cells,unknown);for(const c of constraints){if(c.target<0||c.target>c.vars.length)return {ok:false,message:c.global?'已标钻石数量与地图总数冲突。':`第 ${coordinates(c.source).row} 行、第 ${coordinates(c.source).col} 列的数字约束冲突。`};}
+ const memberships=unknown.map(()=>[]);constraints.forEach((c,ci)=>c.vars.forEach(v=>memberships[v].push(ci)));
+ const order=unknown.map((_,i)=>i).sort((a,b)=>memberships[b].length-memberships[a].length);const assigned=Array(unknown.length).fill(-1);const sums=constraints.map(()=>0),remaining=constraints.map(c=>c.vars.length);const freq=Array(unknown.length).fill(0);let solutions=0;
+ function dfs(pos){if(pos===order.length){solutions++;for(let k=0;k<assigned.length;k++)if(assigned[k]===1)freq[k]++;return;}
+   const v=order[pos];for(let val=0;val<=1;val++){assigned[v]=val;let possible=true;const touched=memberships[v];for(const ci of touched){remaining[ci]--;if(val)sums[ci]++;const c=constraints[ci];if(sums[ci]>c.target||sums[ci]+remaining[ci]<c.target)possible=false;}
+     if(possible)dfs(pos+1);
+     for(const ci of touched){if(val)sums[ci]--;remaining[ci]++;}assigned[v]=-1;
+   }
+ }
+ dfs(0);if(!solutions)return {ok:false,message:'当前标记不存在满足所有数字与钻石总数的合法布局，请检查输入。'};const out={};unknown.forEach((cell,i)=>out[cell]=freq[i]/solutions);return {ok:true,probabilities:out,solutions};}
+function calculate(){state.probabilities={};state.solutionCount=null;state.solverMode='approx';const c=counts();if(state.conflict){state.modeMessage=state.conflict;return;}if(c.unknown===0){if(c.remaining!==0){state.conflict=`所有格子已填写，但仍有 ${c.remaining} 颗钻石未标记。`;state.modeMessage=state.conflict;return;}state.solverMode='exact';state.modeMessage='棋盘所有格子均已填写。';return;}
+ if(c.unknown<=16){const result=exactProbabilities(state.cells,state.cells.map((v,i)=>v===null?i:-1).filter(i=>i>=0));if(!result.ok){state.conflict=result.message;state.modeMessage=result.message;return;}state.probabilities=result.probabilities;state.solutionCount=result.solutions;state.solverMode='exact';state.modeMessage=`精确模式：枚举得到 ${result.solutions.toLocaleString('zh-CN')} 个合法布局。`;
+ }else{const p=Math.max(0,Math.min(1,c.remaining/c.unknown));state.cells.forEach((v,i)=>{if(v===null)state.probabilities[i]=p;});state.solverMode='approx';state.modeMessage=`近似模式：待定格 ${c.unknown} 个（超过 16 格），当前按剩余钻石密度 ${Math.round(p*100)}% 估算；继续录入后会自动切换精确计算。`;}
+}
+function selectRecommendation(){const entries=Object.entries(state.probabilities).map(([idx,p])=>({index:Number(idx),p,clues:neighbors(Number(idx)).filter(j=>typeof state.cells[j]==='number').length}));if(!entries.length)return null;entries.sort((a,b)=>b.p-a.p||b.clues-a.clues||a.index-b.index);return entries[0];}
+function percent(p){return `${Math.round(p*100)}%`;}
+function renderBoard(){board.style.gridTemplateColumns=`repeat(${state.size}, var(--cell))`;board.innerHTML='';for(let i=0;i<state.cells.length;i++){const v=state.cells[i],cell=document.createElement('button');cell.type='button';cell.className='cell';cell.dataset.index=String(i);cell.setAttribute('role','gridcell');cell.setAttribute('aria-label',`第 ${coordinates(i).row} 行第 ${coordinates(i).col} 列，${labelStatus(v)}`);
+  if(v===null){cell.classList.add('unknown');const p=state.probabilities[i];if(p!==undefined){cell.textContent=percent(p);cell.title=`第 ${coordinates(i).row} 行第 ${coordinates(i).col} 列：${percent(p)}${state.solverMode==='approx'?'（近似）':'（精确）'}`;cell.classList.add(p<.2?'low':p<.5?'medium':'high');}else{cell.textContent='·';cell.title=`第 ${coordinates(i).row} 行第 ${coordinates(i).col} 列：待定`;}}
+  else if(v==='gem'){cell.classList.add('gem');cell.textContent='💎';cell.title=`第 ${coordinates(i).row} 行第 ${coordinates(i).col} 列：已标钻石`;}
+  else if(v==='safe'){cell.classList.add('safe');cell.textContent='×';cell.title=`第 ${coordinates(i).row} 行第 ${coordinates(i).col} 列：已标安全`;}
+  else{cell.classList.add('number',`num-${v}`);cell.textContent=String(v);cell.title=`第 ${coordinates(i).row} 行第 ${coordinates(i).col} 列：数字 ${v}`;}
+  if(i===state.selected)cell.classList.add('selected');if(state.recommend&&state.recommend.index===i&&v===null)cell.classList.add('recommend');cell.addEventListener('click',e=>onCellClick(i,e));cell.addEventListener('contextmenu',e=>{e.preventDefault();applyAction(i,'gem');});board.appendChild(cell);}}
+function render(){const stable=propagate(state.cells);state.cells=stable.cells;state.conflict=state.conflict||stable.conflict;calculate();state.recommend=state.conflict?null:selectRecommendation();renderBoard();const c=counts();$('remaining').textContent=String(Math.max(0,c.remaining));$('totalLabel').textContent=` / ${TOTAL[state.size]}`;$('used').textContent=String(c.gems);$('filled').textContent=String(c.filled);$('boardTitle').textContent=`${state.size}×${state.size} 棋盘`;$('sureGems').textContent=String(c.gems);$('sureSafe').textContent=String(c.safe);$('numberCount').textContent=String(c.numbers);$('unknownCount').textContent=String(c.unknown);$('undoBtn').disabled=state.history.length===0;
+  const r=state.recommend;if(state.conflict){$('recommendMain').textContent='当前记录存在冲突';$('recommendSub').textContent='请检查数字、钻石标记或已填写格。';$('recommendProb').textContent='—';}else if(!r){$('recommendMain').textContent=c.unknown?'暂时没有推荐格':'棋盘已填写完成';$('recommendSub').textContent=c.unknown?'请录入更多游戏中看到的信息。':'所有格子都已有标记。';$('recommendProb').textContent='—';}else{$('recommendMain').textContent=`推荐点开第 ${coordinates(r.index).row} 行、第 ${coordinates(r.index).col} 列`;$('recommendSub').textContent=`钻石概率最高${r.clues?`；周围有 ${r.clues} 个数字格，信息量较高`:'；周围暂无已知数字格'}。`; $('recommendProb').textContent=percent(r.p);}
+  const mode=$('modeStatus');mode.className='status-line '+(state.conflict?'error':state.solverMode==='exact'?'exact':'approx');mode.textContent=state.conflict?state.conflict:(state.modeMessage||'');
+  document.querySelectorAll('[data-size]').forEach(b=>b.classList.toggle('active',Number(b.dataset.size)===state.size));document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===state.tool));}
+function onCellClick(index,e){state.selected=index;if(state.tool==='menu'){openMenu(index,e.clientX,e.clientY);renderBoard();}else{applyAction(index,toolValue(state.tool));}}
+function toolValue(tool){if(tool==='gem'||tool==='safe')return tool;if(tool==='clear')return null;return Number(tool);}
+function openMenu(index,x,y){state.menuIndex=index;const p=coordinates(index);$('menuTitle').textContent=`标记第 ${p.row} 行、第 ${p.col} 列（当前：${labelStatus(state.cells[index])}）`;menuGrid.innerHTML='';const options=[...Array(9)].map((_,i)=>({value:i,label:String(i),cls:''}));options.push({value:'gem',label:'💎',cls:'gem'},{value:'safe',label:'× 安全',cls:'safe'},{value:null,label:'清除',cls:'clear'});options.forEach(opt=>{const b=document.createElement('button');b.type='button';b.className='menu-option '+opt.cls;b.textContent=opt.label;if(opt.value==='safe'||opt.value==='gem'||opt.value===null)b.classList.add('special');b.addEventListener('click',()=>applyAction(index,opt.value));menuGrid.appendChild(b);});menu.hidden=false;const width=260,height=225;const left=Math.min(Math.max(8,x||window.innerWidth/2),window.innerWidth-width-8);const top=Math.min(Math.max(8,y||window.innerHeight/2),window.innerHeight-height-8);menu.style.left=`${left}px`;menu.style.top=`${top}px`;}
+function closeMenu(){menu.hidden=true;state.menuIndex=-1;}
+function resetBoard(){if(state.cells.every(v=>v===null))return;takeSnapshot();state.cells=Array(state.size*state.size).fill(null);state.selected=-1;state.conflict=null;closeMenu();render();}
+function undo(){const prev=state.history.pop();if(!prev)return;state.size=prev.size;state.cells=cloneCells(prev.cells);state.selected=-1;state.conflict=null;closeMenu();render();}
+function doDeduce(){const before=state.cells.join('|');const res=propagate(state.cells);if(res.cells.join('|')!==before){takeSnapshot();state.cells=res.cells;}state.conflict=res.conflict;render();}
+function setSize(size){if(size===state.size)return;state.size=size;state.cells=Array(size*size).fill(null);state.history=[];state.selected=-1;state.conflict=null;closeMenu();render();}
+document.querySelectorAll('[data-size]').forEach(b=>b.addEventListener('click',()=>setSize(Number(b.dataset.size))));document.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>{state.tool=b.dataset.tool;render();}));$('undoBtn').addEventListener('click',undo);$('deduceBtn').addEventListener('click',doDeduce);$('clearBtn').addEventListener('click',resetBoard);$('menuClose').addEventListener('click',closeMenu);$('globalConstraint').addEventListener('change',e=>{state.useGlobal=!!e.target.checked;state.conflict=null;const res=propagate(state.cells);state.cells=res.cells;state.conflict=res.conflict;render();});document.addEventListener('pointerdown',e=>{if(!menu.hidden&&!menu.contains(e.target)&&!e.target.closest('.cell'))closeMenu();});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();return;}if(state.selected<0||menu.hidden===false)return;if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;let value; if(/^[0-8]$/.test(e.key))value=Number(e.key);else if(e.key==='Enter')value='gem';else if(e.key.toLowerCase()==='x')value='safe';else if(e.key==='Delete'||e.key==='Backspace')value=null;else return;e.preventDefault();applyAction(state.selected,value);});
+// 本地自测：用于命令行浏览器回归，不影响正常页面。
+function selfTest(){const report=[];function check(name,fn){try{if(fn())report.push('PASS '+name);else report.push('FAIL '+name);}catch(e){report.push('FAIL '+name+' '+e.message);}}
+ const old={size:state.size,cells:state.cells,history:state.history,tool:state.tool,selected:state.selected,conflict:state.conflict};
+ state.size=8;state.cells=Array(64).fill(null);let cells=state.cells.slice();cells[6*8+3]=1;cells[7*8+3]='gem';const p=propagate(cells);check('确定性推导：数字1周围已有1颗钻石时，其余邻格标安全',()=>neighbors(6*8+3).filter(i=>i!==7*8+3).every(i=>p.cells[i]==='safe'));
+ state.cells=Array(64).fill(null);state.cells[0]=0;let p0=propagate(state.cells);check('数字0推导周围安全',()=>neighbors(0).every(i=>p0.cells[i]==='safe'));
+ const plainCells=Array(64).fill('safe');for(let i=0;i<16;i++)plainCells[i]=null;const plainUnknown=plainCells.map((v,i)=>v===null?i:-1).filter(i=>i>=0);const plain=exactProbabilities(plainCells,plainUnknown);check('精确枚举：无数字约束时各待定格概率为 50%',()=>plain.ok&&plain.solutions===65536&&Object.values(plain.probabilities).every(x=>Math.abs(x-.5)<1e-9));
+ state.cells=Array(64).fill('safe');const center=2*8+2;state.cells[center]=3;for(const i of [1*8+1,1*8+2,1*8+3,2*8+1])state.cells[i]=null;const u75=state.cells.map((v,i)=>v===null?i:-1).filter(i=>i>=0);const res75=exactProbabilities(state.cells,u75);check('交叉测试基础：3 颗钻石分布在 4 格时概率各为 75%',()=>res75.ok&&u75.every(i=>Math.abs(res75.probabilities[i]-.75)<1e-9));
+ state.size=10;state.cells=Array(100).fill('safe');const upper=6*10+3,lower=7*10+3;state.cells[upper]=3;state.cells[lower]=3;const a=5*10+3,b=5*10+2,c=6*10+2,d=7*10+2,f=8*10+2,g=8*10+4;[a,b,c,d,f].forEach(i=>state.cells[i]=null);state.cells[g]='gem';const crossUnknown=state.cells.map((v,i)=>v===null?i:-1).filter(i=>i>=0);const cross=exactProbabilities(state.cells,crossUnknown);check('交叉约束：左上/左为 75%，左下为 50%',()=>cross.ok&&Math.abs(cross.probabilities[c]-.75)<1e-9&&Math.abs(cross.probabilities[d]-.75)<1e-9&&Math.abs(cross.probabilities[f]-.5)<1e-9);
+ state.useGlobal=false;state.size=8;state.cells=Array(64).fill(null);state.history=[];const baseline=state.cells.join('|');for(let i=0;i<5;i++){takeSnapshot();state.cells[i]='gem';}for(let i=0;i<5;i++)undo();check('连续撤销 5 步后棋盘完整还原',()=>state.cells.join('|')===baseline&&state.history.length===0);
+ state.size=old.size;state.cells=old.cells;state.history=old.history;state.tool=old.tool;state.selected=old.selected;state.conflict=old.conflict;return report.join('\n');}
+if(new URLSearchParams(location.search).has('selftest')){const report=selfTest();document.body.innerHTML='<pre id="testReport" style="white-space:pre-wrap;padding:24px;font:16px monospace"></pre>';document.getElementById('testReport').textContent=report;}
+render();
+})();
+</script>
+</body>
+</html>
